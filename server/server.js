@@ -23,6 +23,14 @@ const { auth } = require('./middleware/auth');
 const { admin } = require('./middleware/admin');
 
 
+//test for server is connected or not
+
+app.get('/', function(req, res) {
+    res.send('connected');
+});
+
+
+
 // ===================================
 //             PRODUCTS
 // ===================================
