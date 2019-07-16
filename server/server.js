@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const formidable = require('express-formidable');
+const cloudinary = require('cloudinary');
 
 const app = express();
 const mongoose = require('mongoose'); 
@@ -12,6 +14,12 @@ mongoose.connect(encodeURI(process.env.DATABASE));
 app.use(bodyParser.urlencoded({extended:true})); 
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+cloudinary.config({
+    cloud_name:process.env.CLOUD_NAME,
+    api_key:process.env.CLOUD_API,
+    api_secret:process.env.CLOUD_API_SECRET
+})
 
 // Models
 const { User } = require('./models/users');
@@ -281,6 +289,39 @@ app.get('/api/users/logout',auth,(req,res)=>{
             })
         }
     )
+
+})
+
+app.post('/api/users/uploadImage',auth,admin,formidable(),(req,res)=>{
+
+    cloudinary.uploader.upload(req.files.file.path,(result)=>{
+        console.log(result)
+        res.status(200).send({
+            public_id:result.public_id,
+            url:result.url
+        })
+    },
+    {
+        public_id:`${Date.now()}`,
+        resource_type:'auto'
+    }
+    
+    )
+
+})
+
+app.get('/api/users/removeImage',auth,admin,(req,res)=>{
+
+    const {imageId} = req.query;
+
+    cloudinary.uploader.destroy(imageId,(result,err)=>{
+        if(result['result'] != 'ok') return res.json({success:false,error:result['result']});
+
+        return res.status(200).send({
+            success:true,
+            result:result['result']
+        })
+    })
 
 })
 
