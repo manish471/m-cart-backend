@@ -1,0 +1,3 @@
+mongodb://localhost:27017/shop-management-api
+
+mongodb+srv://manish:manish99@m-cart-bfadw.mongodb.net/m-cart

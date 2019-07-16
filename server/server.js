@@ -146,10 +146,18 @@ app.post('/api/product/brand',auth,admin,(req,res)=>{
    brand.save((err,doc)=>{
         if(err) return res.json({success:false,err});
 
-        res.status(200).json({
-            success:true,
-            brand:doc
+        Brand.find({},(err,brands)=>{
+            if(err) return res.status(400).send(err);
+
+            res.status(200).json({
+                success:true,
+                brand:doc,
+                resultArray:brands
+            })            
+
         })
+
+ 
    })
 
 })
