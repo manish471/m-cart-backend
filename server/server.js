@@ -17,6 +17,7 @@ app.use(cookieParser());
 const { User } = require('./models/users');
 const {Brand} = require('./models/brand');
 const {Product} = require('./models/product');
+const {ProductType} = require('./models/productType');
 
 //Middlewares
 const { auth } = require('./middleware/auth');
@@ -29,6 +30,35 @@ app.get('/', function(req, res) {
     res.send('connected');
 });
 
+
+// ===================================
+//             PRODUCT_TYPE
+// ===================================
+
+app.post('/api/product/type',auth,admin,(req,res)=>{
+    
+    const productType = new ProductType(req.body);
+
+    productType.save((err,doc)=>{
+        if(err) return res.json({success:false,err});
+
+        res.status(200).json({
+            success:true,
+            productType:doc
+        })
+    })
+
+})
+
+app.get('/api/product/type',auth,(req,res)=>{
+
+    ProductType.find({},(err,types)=>{
+        if(err) return res.status(400).send(err);
+
+        res.status(200).send(types);
+    });
+
+})
 
 
 // ===================================
@@ -49,6 +79,7 @@ app.post('/api/product',auth,admin,(req,res)=>{
     })
 
 })
+
 
 
 // Storing filters applied by client
@@ -128,6 +159,7 @@ app.get('/api/product',auth,(req,res)=>{
 
             res.status(200).send(products);
         }).populate('brand')
+          .populate('productType');
 
     }
 
