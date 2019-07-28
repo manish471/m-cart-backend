@@ -136,9 +136,12 @@ app.post('/api/product/filter',auth,(req,res)=>{
 
 //sort by sell or arrival
 //?sortBy=sold&order=desc&limit=4
+//?publish=false
 app.get('/api/product',auth,(req,res)=>{
 
-    const {productId,sortBy,order,limit} = req.query;
+    const {productId,sortBy,order,limit,publish} = req.query;
+
+    let _publish = publish?publish:"none";
 
     if(sortBy || order || limit){
         let _order = order?order:'asc';
@@ -155,7 +158,21 @@ app.get('/api/product',auth,(req,res)=>{
 
             res.send(products);
         })
-    }else{
+    }else if(publish === "false" || publish === "true"){
+
+        Product.find({ 'publish' : { $eq : publish === "true"?true:false } },(err,products)=>{
+            if(err) return res.status(400).send(err);
+
+            if(productId !== undefined){
+                const productById = products.filter(val=>val._id.toString() === productId)[0];
+                return res.status(200).send(productById);
+            }
+
+            res.status(200).send(products);
+        }).populate('brand')
+          .populate('productType');
+    }
+    else{
 
         Product.find({},(err,products)=>{
             if(err) return res.status(400).send(err);
@@ -294,6 +311,7 @@ app.get('/api/users/logout',auth,(req,res)=>{
 
 app.post('/api/users/uploadImage',auth,admin,formidable(),(req,res)=>{
 
+    console.log(req.files);
     cloudinary.uploader.upload(req.files.file.path,(result)=>{
         console.log(result)
         res.status(200).send({
